@@ -24,10 +24,12 @@ Use a monorepo managed with pnpm workspaces and Turborepo.
 ### Separate repositories
 
 Pros:
+
 - Clear separation
 - Independent deployments
 
 Cons:
+
 - More setup overhead
 - Harder shared types
 - More CI/CD duplication
@@ -35,20 +37,24 @@ Cons:
 ### Monorepo without Turborepo
 
 Pros:
+
 - Simpler initially
 
 Cons:
+
 - Slower builds later
 - No task caching
 
 ## Consequences
 
 Pros:
+
 - Shared TypeScript types
 - Unified tooling
 - Easier refactoring
 - One CI/CD pipeline
 
 Cons:
+
 - Requires discipline in folder structure
 - Initial setup is slightly more complex
