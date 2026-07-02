@@ -1,0 +1,37 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start Web",
+      "type": "shell",
+      "command": "pnpm dev:web",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Start API",
+      "type": "shell",
+      "command": "pnpm dev:api",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Docker Up",
+      "type": "shell",
+      "command": "pnpm docker:up",
+      "problemMatcher": []
+    },
+    {
+      "label": "Lint",
+      "type": "shell",
+      "command": "pnpm lint",
+      "problemMatcher": []
+    },
+    {
+      "label": "Build",
+      "type": "shell",
+      "command": "pnpm build",
+      "problemMatcher": []
+    }
+  ]
+}

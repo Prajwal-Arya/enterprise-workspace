@@ -8,11 +8,17 @@
     "lint": "turbo lint",
     "test": "turbo test",
     "format": "prettier --write .",
-    "check-format": "prettier --check ."
+    "check-format": "prettier --check .",
+    "dev:web": "pnpm --filter web dev",
+    "dev:api": "pnpm --filter api start:dev",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.0",
     "@commitlint/config-conventional": "^21.2.0",
+    "@nestjs/cli": "^11.0.23",
     "eslint": "^10.6.0",
     "husky": "^9.1.7",
     "lint-staged": "^17.0.8",

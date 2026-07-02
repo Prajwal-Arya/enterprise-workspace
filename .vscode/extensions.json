@@ -1,0 +1,16 @@
+{
+  "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "Prisma.prisma",
+    "ms-azuretools.vscode-docker",
+    "eamodio.gitlens",
+    "usernamehw.errorlens",
+    "bradlc.vscode-tailwindcss",
+    "yzhang.markdown-all-in-one",
+    "christian-kohler.path-intellisense",
+    "PKief.material-icon-theme",
+    "Gruntfuggly.todo-tree",
+    "streetsidesoftware.code-spell-checker"
+  ]
+}

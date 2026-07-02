@@ -9,3 +9,9 @@ coverage/
 !.env.example
 .DS_Store
 *.log
+
+# Environment
+.env
+.env.*
+!.env.example
+!.env.local.example
