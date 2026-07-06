@@ -13,17 +13,178 @@ enum UserStatus {
   PENDING_VERIFICATION
 }
 
-model User {
-  id           String     @id @default(uuid())
-  email        String     @unique
-  passwordHash String
-  firstName    String?
-  lastName     String?
-  status       UserStatus @default(PENDING_VERIFICATION)
+enum OrganizationStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
 
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+enum MembershipStatus {
+  ACTIVE
+  INVITED
+  SUSPENDED
+  REMOVED
+}
+
+model User {
+  id              String     @id @default(uuid())
+  email           String     @unique
+  passwordHash    String
+  firstName       String?
+  lastName        String?
+  status          UserStatus @default(PENDING_VERIFICATION)
+  emailVerifiedAt DateTime?
+
+  memberships     Membership[]
+  sessions        Session[]
+  auditLogs        AuditLog[] @relation("ActorAuditLogs")
+  invitedMembers   Membership[] @relation("InvitedBy")
+
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  deletedAt       DateTime?
 
   @@index([email])
   @@index([status])
+}
+
+model Organization {
+  id          String             @id @default(uuid())
+  name        String
+  slug        String             @unique
+  status      OrganizationStatus @default(ACTIVE)
+
+  memberships Membership[]
+  roles       Role[]
+  auditLogs   AuditLog[]
+
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  deletedAt   DateTime?
+
+  @@index([slug])
+  @@index([status])
+}
+
+model Membership {
+  id             String           @id @default(uuid())
+
+  userId         String
+  organizationId String
+  invitedById    String?
+
+  status         MembershipStatus @default(INVITED)
+  joinedAt       DateTime?
+  invitedAt      DateTime?
+
+  user           User             @relation(fields: [userId], references: [id])
+  organization   Organization     @relation(fields: [organizationId], references: [id])
+  invitedBy      User?            @relation("InvitedBy", fields: [invitedById], references: [id])
+
+  roles          MembershipRole[]
+
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  deletedAt      DateTime?
+
+  @@unique([userId, organizationId])
+  @@index([userId])
+  @@index([organizationId])
+  @@index([status])
+}
+
+model Role {
+  id             String           @id @default(uuid())
+  organizationId String
+  name           String
+  description    String?
+  isSystemRole   Boolean          @default(false)
+
+  organization   Organization     @relation(fields: [organizationId], references: [id])
+  permissions    RolePermission[]
+  memberships    MembershipRole[]
+
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  deletedAt      DateTime?
+
+  @@unique([organizationId, name])
+  @@index([organizationId])
+}
+
+model Permission {
+  id          String           @id @default(uuid())
+  key         String           @unique
+  module      String
+  description String?
+
+  roles       RolePermission[]
+
+  createdAt   DateTime         @default(now())
+
+  @@index([key])
+  @@index([module])
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+
+  role         Role       @relation(fields: [roleId], references: [id])
+  permission   Permission @relation(fields: [permissionId], references: [id])
+
+  @@id([roleId, permissionId])
+  @@index([permissionId])
+}
+
+model MembershipRole {
+  membershipId String
+  roleId       String
+
+  membership   Membership @relation(fields: [membershipId], references: [id])
+  role         Role       @relation(fields: [roleId], references: [id])
+
+  @@id([membershipId, roleId])
+  @@index([roleId])
+}
+
+model Session {
+  id               String    @id @default(uuid())
+  userId           String
+  refreshTokenHash String
+  userAgent        String?
+  ipAddress        String?
+  expiresAt        DateTime
+  revokedAt        DateTime?
+
+  user             User      @relation(fields: [userId], references: [id])
+
+  createdAt        DateTime  @default(now())
+
+  @@index([userId])
+  @@index([refreshTokenHash])
+  @@index([expiresAt])
+}
+
+model AuditLog {
+  id             String        @id @default(uuid())
+  organizationId String?
+  actorUserId    String?
+
+  action         String
+  entityType     String
+  entityId       String?
+  metadata       Json?
+  ipAddress      String?
+  userAgent      String?
+
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  actorUser      User?         @relation("ActorAuditLogs", fields: [actorUserId], references: [id])
+
+  createdAt      DateTime      @default(now())
+
+  @@index([organizationId])
+  @@index([actorUserId])
+  @@index([createdAt])
+  @@index([entityType, entityId])
 }
