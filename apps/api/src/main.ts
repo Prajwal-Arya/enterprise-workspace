@@ -8,6 +8,7 @@ import {
   ValidationPipe,
   VersioningType,
 } from '@nestjs/common';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -40,6 +41,16 @@ async function bootstrap() {
       },
     }),
   );
+
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('Enterprise Workspace API')
+    .setDescription('REST API documentation for Enterprise Workspace')
+    .setVersion('0.1.0')
+    .addBearerAuth()
+    .build();
+
+  const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup('api/docs', app, swaggerDocument);
 
   const port = Number(process.env.PORT) || 4000;
   await app.listen(port);
