@@ -82,19 +82,24 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       }
 
       const responseObject = response as {
+        code?: string;
         message?: string | string[];
         error?: string;
         statusCode?: number;
+        details?: unknown;
       };
 
       return {
-        code: this.mapStatusToCode(exception.getStatus()),
+        code:
+          responseObject.code || this.mapStatusToCode(exception.getStatus()),
         message: Array.isArray(responseObject.message)
           ? 'Validation failed'
           : responseObject.message || responseObject.error || 'Request failed',
-        details: Array.isArray(responseObject.message)
-          ? responseObject.message
-          : undefined,
+        details:
+          responseObject.details ||
+          (Array.isArray(responseObject.message)
+            ? responseObject.message
+            : undefined),
       };
     }
 
