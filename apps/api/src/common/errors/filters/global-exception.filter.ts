@@ -4,6 +4,7 @@ import {
   ExceptionFilter,
   HttpException,
   HttpStatus,
+  Logger,
 } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { Request, Response } from 'express';
@@ -41,16 +42,21 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     };
 
     if (statusCode >= 500) {
-      console.error({
-        traceId,
-        path: request.url,
-        method: request.method,
-        exception,
-      });
+      this.logger.error(
+        {
+          traceId,
+          path: request.url,
+          method: request.method,
+          exception,
+        },
+        'Unhandled exception',
+      );
     }
 
     response.status(statusCode).json(body);
   }
+
+  private readonly logger = new Logger(GlobalExceptionFilter.name);
 
   private getErrorPayload(exception: unknown): {
     code: string;

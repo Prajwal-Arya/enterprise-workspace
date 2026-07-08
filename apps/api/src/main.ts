@@ -4,14 +4,31 @@ import { GlobalExceptionFilter } from './common/errors/filters/global-exception.
 import { ResponseInterceptor } from './common/response/interceptors/response.interceptor';
 import {
   BadRequestException,
+  Logger,
   ValidationError,
   ValidationPipe,
   VersioningType,
 } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import helmet from 'helmet';
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  const configService = app.get(ConfigService);
+  const frontendUrl = configService.getOrThrow<string>('app.frontendUrl');
+
+  app.use(helmet());
+
+  app.enableCors({
+    origin: frontendUrl,
+    credentials: true,
+    methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  });
+
+  const logger = new Logger('Bootstrap');
 
   app.setGlobalPrefix('api');
 
@@ -55,7 +72,8 @@ async function bootstrap() {
   const port = Number(process.env.PORT) || 4000;
   await app.listen(port);
 
-  console.log(`API running on http://localhost:${port}`);
+  logger.log(`API running on http://localhost:${port}`);
+  logger.log(`Swagger docs running on http://localhost:${port}/api/docs`);
 }
 
 bootstrap();
