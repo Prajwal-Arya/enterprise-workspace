@@ -6,7 +6,6 @@ import {
   HttpStatus,
   Logger,
 } from '@nestjs/common';
-import { randomUUID } from 'crypto';
 import { Request, Response } from 'express';
 import { ErrorCode } from '../codes/error-codes';
 import { AppException } from '../exceptions/app.exception';
@@ -19,7 +18,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
-    const traceId = randomUUID();
+    const traceId = request.traceId ?? 'unavailable';
 
     const statusCode =
       exception instanceof HttpException

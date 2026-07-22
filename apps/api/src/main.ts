@@ -12,12 +12,21 @@ import {
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 import { ConfigService } from '@nestjs/config';
+import { ConsoleLogger } from '@nestjs/common';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const bootstrapLogger = new Logger('Bootstrap');
+  const app = await NestFactory.create(AppModule, {
+    logger: new ConsoleLogger({
+      json: true,
+      colors: false,
+    }),
+  });
 
   const configService = app.get(ConfigService);
   const frontendUrl = configService.getOrThrow<string>('app.frontendUrl');
+
+  app.enableShutdownHooks();
 
   app.use(helmet());
 
@@ -25,7 +34,8 @@ async function bootstrap() {
     origin: frontendUrl,
     credentials: true,
     methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Trace-Id'],
+    exposedHeaders: ['X-Trace-Id'],
   });
 
   const logger = new Logger('Bootstrap');
@@ -72,8 +82,19 @@ async function bootstrap() {
   const port = Number(process.env.PORT) || 4000;
   await app.listen(port);
 
-  logger.log(`API running on http://localhost:${port}`);
-  logger.log(`Swagger docs running on http://localhost:${port}/api/docs`);
+  bootstrapLogger.log(`API listening on port ${port}`);
+  bootstrapLogger.log(
+    `Swagger docs running on http://localhost:${port}/api/docs`,
+  );
 }
 
-bootstrap();
+bootstrap().catch((error: unknown) => {
+  const logger = new Logger('Bootstrap');
+
+  logger.error(
+    'Application failed to start',
+    error instanceof Error ? error.stack : String(error),
+  );
+
+  process.exitCode = 1;
+});
